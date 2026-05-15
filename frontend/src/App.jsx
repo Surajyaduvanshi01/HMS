@@ -13,7 +13,6 @@ import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
 import Billing from "./pages/Billing";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
 
 function App() {
   const token =
@@ -33,19 +32,6 @@ function App() {
               <Navigate to="/" />
             ) : (
               <Login />
-            )
-          }
-        />
-
-        {/* SIGNUP */}
-
-        <Route
-          path="/signup"
-          element={
-            token ? (
-              <Navigate to="/" />
-            ) : (
-              <Signup />
             )
           }
         />

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
 import { Mail, Lock, Heart, Users, BarChart3, ArrowRight } from "lucide-react";
 
@@ -141,17 +141,6 @@ function Login() {
               </>
             )}
           </button>
-
-          {/* Signup Link */}
-          <p className="text-center text-gray-600 text-sm mt-6">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="font-semibold text-emerald-600 hover:text-emerald-700 transition"
-            >
-              Sign up
-            </Link>
-          </p>
         </form>
 
         {/* Footer */}
