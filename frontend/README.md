@@ -22,7 +22,13 @@ This project uses Vite environment variables for backend configuration.
 - Create or update `frontend/.env`
 - Use `VITE_API_URL` for the backend base URL
 
-Example:
+Local development example:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+Production example:
 
 ```env
 VITE_API_URL=https://hms-backend-gsbs.onrender.com/api
