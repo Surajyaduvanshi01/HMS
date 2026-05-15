@@ -7,7 +7,7 @@ import {
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "./pages/DashBoard";
 import Patients from "./pages/Patients";
 import Doctors from "./pages/Doctors";
 import Appointments from "./pages/Appointments";
