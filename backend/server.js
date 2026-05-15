@@ -1,8 +1,10 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
 
 const connectDB = require("./config/db");
+const User = require("./models/User");
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
@@ -16,9 +18,6 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 
 // Config
 dotenv.config();
-
-// Connect Database
-connectDB();
 
 const app = express();
 
@@ -88,12 +87,48 @@ app.use((req, res) => {
   });
 });
 
+const createDefaultAdmin = async () => {
+  try {
+    const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || "admin@gmail.com";
+    const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || "123456";
+    const adminName = process.env.DEFAULT_ADMIN_NAME || "Admin";
+
+    const adminExists = await User.findOne({ email: adminEmail });
+    if (adminExists) {
+      console.log("✅ Default admin already exists.");
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+    await User.create({
+      name: adminName,
+      email: adminEmail,
+      password: hashedPassword,
+      role: "admin",
+    });
+
+    console.log("✅ Default admin created successfully!");
+    console.log(`Email: ${adminEmail}`);
+    console.log(`Password: ${adminPassword}`);
+  } catch (error) {
+    console.error("❌ Error creating default admin:", error.message);
+  }
+};
+
 // =========================
 // Start Server
 // =========================
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+const startServer = async () => {
+  await connectDB();
+  await createDefaultAdmin();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+};
+
+startServer();
