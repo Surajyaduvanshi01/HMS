@@ -15,7 +15,7 @@ const corsOptions = {
   origin: [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://hms-ui.onrender.com",
+    "https://hms-ui-41aj.onrender.com",
     process.env.FRONTEND_URL
   ],
   credentials: true,
