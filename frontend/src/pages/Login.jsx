@@ -1,7 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API from "../api/axios";
 import { Mail, Lock, Heart, Users, BarChart3, ArrowRight } from "lucide-react";
 
 function Login() {
@@ -33,10 +33,7 @@ function Login() {
     setIsLoading(true);
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
-      );
+      const { data } = await API.post("/auth/login", formData);
 
       localStorage.setItem("token", data.token);
       toast.success("Login successful!");
