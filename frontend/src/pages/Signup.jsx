@@ -2,17 +2,21 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../api/axios";
-import { Mail, Lock, Heart, Users, BarChart3, ArrowRight } from "lucide-react";
+import { Mail, Lock, Heart, Users, BarChart3, ArrowRight, User } from "lucide-react";
 
-function Login() {
+function Signup() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    confirmPassword: "",
+    role: "patient",
   });
 
   const handleChange = (e) => {
@@ -25,21 +29,37 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password) {
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const { data } = await API.post("/auth/login", formData);
+      const signupData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+      };
 
-      localStorage.setItem("token", data.token);
-      toast.success("Login successful!");
-      navigate("/");
+      await API.post("/auth/register", signupData);
+
+      toast.success("Account created successfully! Please login");
+      navigate("/login");
     } catch (error) {
-      toast.error("Invalid email or password");
+      toast.error(error.response?.data?.message || "Error creating account");
       console.log(error);
     } finally {
       setIsLoading(false);
@@ -54,21 +74,44 @@ function Login() {
 
   return (
     <div className="min-h-screen w-full bg-white flex overflow-hidden">
-      {/* Left Side - Login Form */}
+      {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-16 py-12">
         {/* Header */}
         <div className="mb-10 animate-fade-in">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-3 leading-tight">
-            Welcome Back
+            Create Account
           </h1>
           <p className="text-lg text-gray-600">
-            Sign in to access your hospital dashboard
+            Sign up to access your hospital dashboard
           </p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6 max-w-sm animate-slide-left">
           
+          {/* Name Input */}
+          <div className="relative group">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Full Name
+            </label>
+            <div className="relative">
+              <User className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition duration-300 ${
+                focusedField === 'name' ? 'text-emerald-600' : 'text-gray-400'
+              }`} />
+              
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={handleChange}
+                onFocus={() => setFocusedField('name')}
+                onBlur={() => setFocusedField(null)}
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 outline-none transition duration-300 focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-100"
+              />
+            </div>
+          </div>
+
           {/* Email Input */}
           <div className="relative group">
             <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -90,6 +133,25 @@ function Login() {
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 outline-none transition duration-300 focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-100"
               />
             </div>
+          </div>
+
+          {/* Role Selection */}
+          <div className="relative group">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              User Role
+            </label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              onFocus={() => setFocusedField('role')}
+              onBlur={() => setFocusedField(null)}
+              className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-900 outline-none transition duration-300 focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-100"
+            >
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           {/* Password Input */}
@@ -123,6 +185,37 @@ function Login() {
             </div>
           </div>
 
+          {/* Confirm Password Input */}
+          <div className="relative group">
+            <label className="block text-sm font-semibold text-gray-700 mb-3">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <Lock className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition duration-300 ${
+                focusedField === 'confirmPassword' ? 'text-emerald-600' : 'text-gray-400'
+              }`} />
+              
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                onFocus={() => setFocusedField('confirmPassword')}
+                onBlur={() => setFocusedField(null)}
+                className="w-full pl-12 pr-12 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 outline-none transition duration-300 focus:border-emerald-500 focus:bg-white focus:shadow-lg focus:shadow-emerald-100"
+              />
+              
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
+
           {/* Submit Button */}
           <button
             type="submit"
@@ -132,24 +225,24 @@ function Login() {
             {isLoading ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Signing in...</span>
+                <span>Creating Account...</span>
               </>
             ) : (
               <>
-                <span>Sign In</span>
+                <span>Create Account</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
               </>
             )}
           </button>
 
-          {/* Signup Link */}
+          {/* Login Link */}
           <p className="text-center text-gray-600 text-sm mt-6">
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-              to="/signup"
+              to="/login"
               className="font-semibold text-emerald-600 hover:text-emerald-700 transition"
             >
-              Sign up
+              Sign in
             </Link>
           </p>
         </form>
@@ -203,4 +296,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Signup;
