@@ -56,19 +56,25 @@ function Patients() {
       }
     };
 
-  const handleDelete =
-    async (id) => {
-      try {
-        await deletePatient(id);
-        toast.success(
-        "Patient deleted"
-        );
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this patient? This action cannot be undone."
+    );
 
-        fetchPatients();
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    if (!confirmed) return;
+
+    try {
+      await deletePatient(id);
+      toast.success("Patient deleted successfully");
+      fetchPatients();
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to delete patient. Please try again."
+      );
+      console.log(error);
+    }
+  };
 
   return (
     <MainLayout>

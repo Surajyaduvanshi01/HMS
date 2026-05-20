@@ -1,32 +1,73 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { X, User } from "lucide-react";
+
+const initialFormData = {
+  name: "",
+  age: "",
+  gender: "Male",
+  phone: "",
+  address: "",
+  disease: "",
+};
 
 function AddPatientModal({
   open,
   onClose,
   onAdd,
 }) {
-  const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    gender: "Male",
-    phone: "",
-    address: "",
-    disease: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
+
+  const isValidPhone = (value) =>
+    /^[0-9]{10}$/.test(value);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    const normalizedValue =
+      name === "phone"
+        ? value.replace(/\D/g, "").slice(0, 10)
+        : value;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: normalizedValue,
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!formData.name.trim()) {
+      toast.error("Please enter the patient name.");
+      return;
+    }
+
+    const ageValue = Number(formData.age);
+    if (!formData.age || ageValue <= 0 || ageValue > 120) {
+      toast.error("Please enter a valid age between 1 and 120.");
+      return;
+    }
+
+    if (!isValidPhone(formData.phone)) {
+      toast.error("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    if (!formData.address.trim()) {
+      toast.error("Please enter the patient address.");
+      return;
+    }
+
     onAdd(formData);
+    setFormData(initialFormData);
     onClose();
   };
+
+  useEffect(() => {
+    if (!open) {
+      setFormData(initialFormData);
+    }
+  }, [open]);
 
   if (!open) return null;
 
@@ -61,6 +102,7 @@ function AddPatientModal({
             <input
               type="text"
               name="name"
+              value={formData.name}
               placeholder="Enter patient name"
               onChange={handleChange}
               required
@@ -76,8 +118,11 @@ function AddPatientModal({
             <input
               type="number"
               name="age"
+              value={formData.age}
               placeholder="Enter age"
               onChange={handleChange}
+              min={1}
+              max={120}
               required
               className="w-full rounded-xl border-2 border-emerald-200/40 bg-emerald-50/30 px-4 py-3 text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white"
             />
@@ -91,6 +136,7 @@ function AddPatientModal({
               </label>
               <select
                 name="gender"
+                value={formData.gender}
                 onChange={handleChange}
                 className="w-full rounded-xl border-2 border-emerald-200/40 bg-emerald-50/30 px-4 py-3 text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white"
               >
@@ -104,10 +150,14 @@ function AddPatientModal({
                 Phone
               </label>
               <input
-                type="text"
+                type="tel"
                 name="phone"
+                value={formData.phone}
                 placeholder="Enter phone number"
                 onChange={handleChange}
+                inputMode="numeric"
+                maxLength={10}
+                required
                 className="w-full rounded-xl border-2 border-emerald-200/40 bg-emerald-50/30 px-4 py-3 text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white"
               />
             </div>
@@ -121,8 +171,10 @@ function AddPatientModal({
             <input
               type="text"
               name="address"
+              value={formData.address}
               placeholder="Enter address"
               onChange={handleChange}
+              required
               className="w-full rounded-xl border-2 border-emerald-200/40 bg-emerald-50/30 px-4 py-3 text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white"
             />
           </div>
@@ -135,6 +187,7 @@ function AddPatientModal({
             <input
               type="text"
               name="disease"
+              value={formData.disease}
               placeholder="Enter disease or condition"
               onChange={handleChange}
               className="w-full rounded-xl border-2 border-emerald-200/40 bg-emerald-50/30 px-4 py-3 text-gray-900 outline-none transition focus:border-emerald-500 focus:bg-white"
